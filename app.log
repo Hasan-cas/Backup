@@ -1,0 +1,17 @@
+
+2024-11-02 11:42:54,121 - my_logger - ERROR - An error occurred:
+  - Endpoint: /email-verification
+  - Method: POST
+  - User ID: Not logged in
+  - IP Address: 127.0.0.1
+  - User Agent: Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Mobile Safari/537.36
+  - Database URL: file:///data/data/com.termux/files/home/SkillCashify/cashify.db
+  - Error Message: The message does not specify a sender and a default sender has not been configured
+
+2025-03-08 22:52:57,931 - my_logger - ERROR - Entered /get_taka route
+2025-03-08 22:52:57,932 - my_logger - ERROR - GET request detected
+2025-03-08 22:52:57,932 - my_logger - ERROR - Generated CSRF Token: 34946ca3-9def-4dd8-85fa-284bdaa3bee3
+2025-03-08 22:53:00,977 - my_logger - ERROR - Entered /get_taka route
+2025-03-08 22:53:00,977 - my_logger - ERROR - POST request detected
+2025-03-08 22:53:00,982 - my_logger - ERROR - The env variables are InpvcnpqX1ZNWVpOXzQ1NjUzX0pxaHNoX09BMWJHXzg4NDMxX1F0RVJuX203VFJVXzY2MDUwX1hQV29yX3l5VzlBXzQ5NTIwdGNXRU9fYzlMR2ZfOTk4NDUi.Z8sjPg.2iP8ZIofIIuXdS3ZJFYe87OPGiE and ....@.com
+2025-03-08 22:53:00,982 - my_logger - ERROR - Loaded USERNAME: ....@.com, Decrypted PASSWORD: None
