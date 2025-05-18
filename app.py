@@ -64,30 +64,28 @@ money_map = {f"task_{i}": os.getenv(f"task_{i}") for i in range(1, 12)}
 # Configure session to use SQLAlchemy
 db = SQLAlchemy(app)
 
+# Load backend URLs from environment variable
+env_backend_api = os.getenv("BACKEND_API", "")
+TARGET_URLS = [url.strip() for url in env_backend_api.split(",") if url.strip()]
+
+# Extract allowed hostnames from TARGET_URLS
+ALLOWED_HOSTS = [url.split("//")[-1] for url in TARGET_URLS]
+ALLOWED_HOSTS += ["127.0.0.1", "localhost"]
+
+# CSP setup
 csp = {
     'default-src': ["'self'"],
-
-    'img-src': ["'self'", "https://skillcashify.onrender.com"] + 
-               [f"https://skillcashify-{i}.onrender.com" for i in range(1, 14)],
-
-    'style-src': ["'self'", "https://skillcashify.onrender.com"] + 
-                 [f"https://skillcashify-{i}.onrender.com" for i in range(1, 14)],
-
-    'script-src': ["'self'", "https://skillcashify.onrender.com"] + 
-                  [f"https://skillcashify-{i}.onrender.com" for i in range(1, 14)],
-
-    'connect-src': ["'self'", "https://skillcashify.onrender.com"] + 
-                   [f"https://skillcashify-{i}.onrender.com" for i in range(1, 14)],
-
-    'font-src': ["'self'", "https://skillcashify.onrender.com"] + 
-                [f"https://skillcashify-{i}.onrender.com" for i in range(1, 14)],
-
-    'object-src': ["'none'"],  # Disallow plugins and objects
-    'frame-src': ["'none'"],   # Disallow framing
-    'base-uri': ["'self'"],    # Restrict base URIs to self
-    'script-src-attr': ["'none'"],  # Block inline JS attributes
-    'form-action': ["'self'"], # Restrict form submissions
-    'upgrade-insecure-requests': []  # Auto-upgrade HTTP to HTTPS
+    'img-src': ["'self'"] + TARGET_URLS,
+    'style-src': ["'self'"] + TARGET_URLS,
+    'script-src': ["'self'"] + TARGET_URLS,
+    'connect-src': ["'self'"] + TARGET_URLS,
+    'font-src': ["'self'"] + TARGET_URLS,
+    'object-src': ["'none'"],
+    'frame-src': ["'none'"],
+    'base-uri': ["'self'"],
+    'script-src-attr': ["'none'"],
+    'form-action': ["'self'"],
+    'upgrade-insecure-requests': []
 }
 csrf = Talisman(app,
                 content_security_policy=csp,
@@ -188,8 +186,8 @@ def add_corp_header(response):
     return response
 @app.before_request
 def block_unwanted_hosts():
-    allowed_hosts = ["skillcashify.onrender.com", "127.0.0.1", "localhost", "skillcashify-1.onrender.com", "skillcashify-2.onrender.com", "skillcashify-3.onrender.com", "skillcashify-4.onrender.com", "skillcashify-5.onrender.com", "skillcashify-6.onrender.com", "skillcashify-7.onrender.com", "skillcashify-8.onrender.com", "skillcashify-9.onrender.com", "skillcashify-10.onrender.com", "skillcashify-11.onrender.com", "skillcashify-13.onrender.com"]
-    if request.host.split(":")[0] not in allowed_hosts:  # Ignore port numbers
+    request_host = request.host.split(":")[0]  # remove port
+    if request_host not in ALLOWED_HOSTS:
         logging.warning(f"Blocked request from {request.host}")
         abort(403)
 # Serve static files normally
