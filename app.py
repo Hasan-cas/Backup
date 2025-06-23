@@ -180,6 +180,12 @@ class PaymentRequest(db.Model):
     number = db.Column(db.Integer, nullable=False ,unique= False)
     amount = db.Column(db.String(50), nullable=False)  # Redeem code
     request_at = db.Column(db.DateTime, default=datetime.utcnow)  # Timestamp for when it was redeemed
+class Blog(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), unique=True, nullable=False)  # used in URL
+    raw_html = db.Column(db.Text, nullable=False)  # full HTML
+    hashtags = db.Column(db.String(300))  # optional SEO keywords
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 @app.after_request
 def add_corp_header(response):
     response.headers['Cross-Origin-Resource-Policy'] = 'same-origin'
@@ -853,6 +859,31 @@ def get_taka():
 
         # Render an error page if any exception occurs
         return render_template("error.html", message=f"An error occurred. Please try again. {e}")
+
+@app.route('/upload-blog', methods=['GET', 'POST'])
+def upload_blog():
+    if request.method == 'POST':
+        name = request.form['name'].strip().lower().replace(" ", "-")
+        raw_html = request.form['raw_html']
+        hashtags = request.form.get('hashtags', '')
+
+        # Check duplicate
+        if Blog.query.filter_by(name=name).first():
+            return "A blog with this name already exists!", 400
+
+        blog = Blog(name=name, raw_html=raw_html, hashtags=hashtags)
+        db.session.add(blog)
+        db.session.commit()
+
+        return f"Blog uploaded! Visit: /blog/{name}"
+    return render_template("upload_blog.html")
+
+@app.route('/blog/<name>')
+def view_blog(name):
+    blog = Blog.query.filter_by(name=name).first()
+    if not blog:
+        abort(404)
+    return blog.raw_html
 gunicorn_logger = logging.getLogger('gunicorn.error')
 app.logger.handlers = gunicorn_logger.handlers
 app.logger.setLevel(logging.DEBUG)
