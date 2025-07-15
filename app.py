@@ -69,9 +69,8 @@ env_backend_api = os.getenv("BACKEND_API", "")
 TARGET_URLS = [url.strip() for url in env_backend_api.split(",") if url.strip()]
 
 # Extract allowed hostnames from TARGET_URLS
-ALLOWED_HOSTS = [url.split("//")[-1] for url in TARGET_URLS]
-ALLOWED_HOSTS += ["127.0.0.1", "localhost"]
-
+ALLOWED_HOSTS = [url.split("//")[-1].split(":")[0] for url in TARGET_URLS]
+ALLOWED_HOSTS += ["127.0.0.1", "localhost","https://c6898966-5b06-4280-8180-cd72e3f50669-00-21904jn5qm963.sisko.replit.dev/"]
 # CSP setup
 csp = {
     'default-src': ["'self'"],
@@ -862,7 +861,32 @@ def get_taka():
 
 @app.route('/upload-blog', methods=['GET', 'POST'])
 def upload_blog():
-    if request.method == 'POST':
+    try:
+        logger.error("Entered /get_taka route")
+        if not is_authorized_ip():
+            return "Access Denied: This endpoint is restricted.", 400
+        if request.method == 'POST':
+            logger.error("POST request detected")
+
+            if 'csrf_token' not in request.form or request.form['csrf_token'] != session.get('csrf_token'):
+                logger.error("CSRF token validation failed")
+                return redirect("/")
+
+            USERNAME = os.getenv('USERNAME')
+            PASSWORD = os.getenv('PASSWORD')
+            logger.error(f"The env variables are {PASSWORD} and {USERNAME}")
+            root_pass = decrypt_csrf_token(PASSWORD)
+            logger.error(f"Loaded USERNAME: {USERNAME}, Decrypted PASSWORD: {root_pass}")
+
+            username = request.form['username']
+            password = request.form['password']
+
+            if not username or not password:
+                logger.error("Username or Password is missing")
+                return redirect("/")
+
+            if username == USERNAME and password == root_pass:
+                logger.error("User authenticated successfully")
         name = request.form['name'].strip().lower().replace(" ", "-")
         raw_html = request.form['raw_html']
         hashtags = request.form.get('hashtags', '')
