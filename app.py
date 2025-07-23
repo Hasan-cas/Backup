@@ -34,7 +34,7 @@ load_dotenv()
 
 ph = PasswordHasher()
 
-app = Flask(__name__,static_folder='static')
+app = Flask(__name__)
 
 Compress(app)
 limiter = Limiter(
